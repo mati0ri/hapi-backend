@@ -1,0 +1,29 @@
+version: "3"
+services:
+  db:
+    image: postgres
+    # ports:
+    #   - "5431:5432"
+    environment:
+      - POSTGRES_PASSWORD=3945
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=hapi-db
+  backend:
+    build: .
+    # search Dockerfile in the current directory
+    image: hapi
+    ports:
+      - "3100:3100"
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_DB=hapi-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=3945
+      - POSTGRES_HOST=db
+  # frontend:
+  #   build: ../hapi-frontend
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - app
