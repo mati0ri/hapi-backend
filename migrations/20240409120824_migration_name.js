@@ -1,9 +1,4 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 export async function up(knex) {
-    // Création de la table users en premier
     await knex.schema.createTable('users', (table) => {
         table.increments('id');
         table.string('username').notNullable().unique();
@@ -12,30 +7,33 @@ export async function up(knex) {
         table.timestamp('created_at').defaultTo(knex.fn.now());
     });
 
-    // Ensuite, création de la table Messages
-    await knex.schema.createTable('Messages', (table) => {
+    await knex.schema.createTable('messages', (table) => {
         table.increments('id');
         table.string('content');
         table.integer('sender_id').unsigned();
-        table.foreign('sender_id').references('users.id'); // Clé étrangère faisant référence à users.id
+        table.foreign('sender_id').references('users.id');
         table.timestamp('created_at').defaultTo(knex.fn.now());
     });
 
-    // Insérer un message exemple (facultatif)
-    await knex('Messages').insert([
-        { content: 'This message was sent with the migration.', sender_id: 1 } // Assurez-vous que le sender_id 1 existe
-    ]);
-};
+    const insertedUsers = await knex('users').insert({
+        username: 'exampleUser2',
+        password: 'examplePassword',
+        email: 'user2@example.com'
+    }).returning('id');
 
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
+    const userId = insertedUsers[0].id;
+    console.log('User ID:', userId);
+
+    await knex('messages').insert({
+        content: 'This message was sent with the migration.',
+        sender_id: userId
+    });
+
+    console.log('Inserted message');
+    return knex('messages').where('sender_id', userId);
+}
+
 export async function down(knex) {
-    // Supprimer la table Messages en premier à cause de la dépendance
-    await knex.schema.dropTableIfExists('Messages');
-
-    // Ensuite, supprimer la table users
+    await knex.schema.dropTableIfExists('messages');
     await knex.schema.dropTableIfExists('users');
-};
-
+}

@@ -5,9 +5,7 @@ WORKDIR /user/src/app
 COPY package*.json ./
 RUN npm i
 RUN npm i -g nodemon
-# RUN npm uninstall bcrypt
-# RUN npm rebuild bcrypt --build-from-source
-
+RUN npm install -g knex
 
 COPY . .
 

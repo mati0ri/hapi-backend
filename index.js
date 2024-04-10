@@ -23,7 +23,7 @@ const init = async () => {
     await server.register(jwt);
 
 
-    // Auth strategy
+    // Auth strategies
 
     server.auth.strategy('authJwt', 'jwt', {
         keys: 'jwtKey',
@@ -46,6 +46,36 @@ const init = async () => {
             }
         }
     });
+
+    server.auth.strategy('authJwtForUser', 'jwt', {
+        // prevent users to access other users data
+        keys: 'jwtKey',
+        verify: {
+            aud: false,
+            iss: false,
+            sub: false,
+            maxAgeSec: 14400
+        },
+        validate: async (artifacts, request, h) => {
+            try {
+                const payload = JWT.verify(artifacts.token, 'jwtKey');
+                const userIdFromParam = request.params.id;
+    
+                if (userIdFromParam && payload.user.id.toString() !== userIdFromParam.toString()) {
+                    return { isValid: false };
+                }
+    
+                return {
+                    isValid: true,
+                    credentials: { user: payload.user }
+                };
+            } catch (err) {
+                console.error('Failed to verify token:', err.message);
+                return { isValid: false };
+            }
+        }
+    });
+    
 
 
     // On request hook to decrypt token

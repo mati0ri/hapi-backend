@@ -58,7 +58,7 @@ const usersRoutes = [
             }
         },
         options: {
-            auth: false,
+            auth: process.env.NODE_ENV === 'test' ? false : 'authJwtForUser',
             validate: {
                 params: Joi.object({
                     id: Joi.number().integer().required()
