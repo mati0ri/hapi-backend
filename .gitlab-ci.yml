@@ -1,0 +1,7 @@
+run_tests:
+  image: node:20
+  before_script:
+    - npm install
+  script:
+    - echo "Running tests"
+    - npm run test
